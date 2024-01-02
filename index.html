@@ -1,5 +1,9 @@
 <html>
-    <head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>
             m3mapper
         </title>
@@ -7,6 +11,37 @@
             
             function init() {
                 new Manager();
+            }
+            
+            function signToSpan(sign) {
+                let spanClass = '';
+                switch (sign) {
+                    case '1': {
+                        spanClass = 'item_c10';
+                        break;
+                    }
+                    case '2': {
+                        spanClass = 'item_c20';
+                        break;
+                    }
+                    case 'F': {
+                        spanClass = 'item_flower';
+                        break;
+                    }
+                    case 'S': {
+                        spanClass = 'item_star';
+                        break;
+                    }
+                    case 'U': {
+                        spanClass = 'item_up';
+                        break;
+                    }
+                    case 'M': {
+                        spanClass = 'item_mushroom';
+                        break;
+                    }
+                }
+                return '<span class="'+spanClass+'">' + sign + '</span>';
             }
             
             class Field{
@@ -93,6 +128,11 @@
                 showPossibilities() {
                     console.log(this.possibleBoards);
                     let out  = document.getElementById('possibles');
+                    out.classList.remove('open');
+                    console.log(this.possibleBoards.length);
+                    if(this.possibleBoards.length > 1) {
+                        out.classList.add('open');
+                    }
                     out.innerHTML = '';
                     let moo = '';
                     for (let y = 0; y <= 2; y++) {
@@ -100,7 +140,7 @@
                         for (let x = 0; x <= 5; x++) {
                             let signs = [];
                             this.possibleBoards.forEach(function (board) {
-                                signs.push(board.getField(y,x));
+                                signs.push(signToSpan(board.getField(y,x)));
                             });
                             signs = signs.filter(function (value, index, self) {
                                 return self.indexOf(value) === index;
@@ -172,7 +212,7 @@
                             div += '<tr>';
                             for (let x = 0; x <= 5; x++) {
                                 div += '<td>';
-                                div += board.getField(y, x);
+                                div += signToSpan(board.getField(y,x));
                                 div += '</td>';
                             }
                             div += '</tr>';
@@ -390,9 +430,17 @@
             }
         </script>
         <style type="text/css">
+            body, html {
+                background: #000;
+                color: 	#00ff2b;
+            }
+            table {
+                width: 100%;
+                display: block;
+            }
             td {
-                width: 50px;
-                height: 50px;
+                width: 80px;
+                height: 80px;
                 border: solid 1px;
                 text-align: center;
                 vertical-align: middle;
@@ -400,6 +448,54 @@
             #items div {
                 float: left;
                 margin-right: 50px;
+            }
+            button {
+                font-weight: bolder;
+                font-size: 1.2em;
+                margin-right: 0;
+                margin-left: 0;
+                color: 	#00ff2b;
+                border: solid 1px #36ba01;
+                background: #000;
+            }
+            span.item_c10, span.item_c20, span.item_flower, span.item_star, span.item_up, span.item_mushroom {
+                font-size: 0.1em;
+                background: #00ff2b;
+                display: inline-block;
+                min-width: 40px;
+                min-height: 40px;
+                padding: 4px;
+                color: #00ff2b;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+            
+            #possibles.open span {
+                width: 5px;
+                height: 5px;
+                min-width: 5px;
+                max-width: 5px;
+            }
+            span.item_c10 {
+                background: url("/ten.png") no-repeat center;
+            }
+            span.item_c20 {
+                background: url("/twenty.png") no-repeat center;
+            }
+            span.item_flower {
+                background: url("/flower.png") no-repeat center;
+            }
+            span.item_star {
+                background: url("/star.png") no-repeat center;
+            }
+            span.item_up {
+                background: url("/up.png") no-repeat center;
+            }
+            span.item_mushroom {
+                background: url("/mushroom.png") no-repeat center;
+            }
+            #items {
+                margin-top: 100px;
             }
         </style>
     </head>
@@ -410,12 +506,12 @@
                 <button id="resetButton">reset</button>
             </div>
             <div id="workspace">
-                <button id="c10" class="item_c10">10</button>
-                <button id="c20" class="item_c20">20</button>
-                <button id="flower" class="item_flower">flower</button>
+                <button id="c10" class="item_c10">1O</button>
+                <button id="c20" class="item_c20">2O</button>
+                <button id="flower" class="item_flower">fl0w3r</button>
                 <button id="star" class="item_star">star</button>
-                <button id="up" class="item_up">up</button>
-                <button id="mushroom" class="item_mushroom">mushroom</button>
+                <button id="up" class="item_up">uP</button>
+                <button id="mushroom" class="item_mushroom">shrO0m</button>
                 <div>
                     1) select snd left in border line (in game) and hit the representing button <br />
                     2a) if not flower, the thing is clear, which map you play, 83% :) <br />
