@@ -1,0 +1,443 @@
+<html>
+    <head>
+        <title>
+            m3mapper
+        </title>
+        <script>
+            
+            function init() {
+                new Manager();
+            }
+            
+            class Field{
+                constructor(y, x, sign) {
+                    this.y = y;
+                    this.x = x;
+                    this.sign = sign;
+                }
+            }
+            
+            class Board {
+                constructor(number) {
+                    this.show = true;
+                    this.number = number;
+                    this.fields = Array(3)
+                        .fill()
+                        .map(() => Array(6).fill(0));
+                    
+                    
+                }
+                addField(y,x,sign) {
+                    this.fields[y][x] = sign;
+                    console.table(this.fields);
+                    return this;
+                }
+                getField(y,x) {
+                    return this.fields[y][x];
+                }
+
+            }
+
+            class Manager {
+                constructor() {
+                    this.firstSign = null;
+                    this.secondSign = null;
+                    this.boards = [];
+                    this.possibleBoards = [];
+                    this.workspace = document.getElementById('workspace');
+                    this.items = document.getElementById('items');
+                    this.resetButton = document.getElementById('resetButton');
+                    this.coin10Button = document.getElementById('c10');
+                    this.coin20Button = document.getElementById('c20');
+                    this.flowerButton = document.getElementById('flower');
+                    this.starButton = document.getElementById('star');
+                    this.upButton = document.getElementById('up');
+                    this.mushroomButton = document.getElementById('mushroom');
+                    this.loadBoards();
+                    this.showItems();
+                    this.bindButtons();
+                    this.resetButton.click();
+                }
+
+                calculate() {
+                    let that = this;
+                    console.log('calculating');
+                    console.log(this.firstSign);
+                    console.log(this.secondSign);
+                    document.getElementById('firstSign').innerHTML = this.firstSign;
+                    document.getElementById('secondSign').innerHTML = this.secondSign;
+                    if(null === this.firstSign) {
+                        this.possibleBoards = this.boards;
+                        this.showPossibilities();
+                        return;
+                    }
+                    if(null === this.secondSign) {
+                        this.flowerButton.disabled = true;
+                        this.possibleBoards = [];
+                        this.boards.forEach(function (board) {
+                            if(board.getField(2,1) === that.firstSign) {
+                                that.possibleBoards.push(board);
+                            }
+                        });
+                        this.showPossibilities();
+                        return;
+                    }
+                    this.possibleBoards = [];
+                    this.boards.forEach(function (board) {
+                        if (board.getField(2, 1) === that.firstSign && board.getField(0, 1) === that.secondSign) {
+                            that.possibleBoards.push(board);
+                        }
+                    });
+                    this.showPossibilities();
+                }
+                
+                showPossibilities() {
+                    console.log(this.possibleBoards);
+                    let out  = document.getElementById('possibles');
+                    out.innerHTML = '';
+                    let moo = '';
+                    for (let y = 0; y <= 2; y++) {
+                        moo += '<tr>';
+                        for (let x = 0; x <= 5; x++) {
+                            let signs = [];
+                            this.possibleBoards.forEach(function (board) {
+                                signs.push(board.getField(y,x));
+                            });
+                            signs = signs.filter(function (value, index, self) {
+                                return self.indexOf(value) === index;
+                            })
+                            moo += '<td>';
+                            moo += signs.join(' ');
+                            moo += '</td>';
+                        }
+                        moo += '</tr>';
+                    }
+                    out.innerHTML += moo;
+                }
+                
+                handleSign(what) {
+                    if(null === this.firstSign) {
+                        this.firstSign = what;
+                        this.calculate();
+                        return;
+                    }
+                    if(null === this.secondSign) {
+                        this.secondSign = what;
+                        this.calculate();
+                    }
+                }
+                
+                bindButtons() {
+                    this.resetButton.addEventListener("click", () => {
+                        this.firstSign  = null;
+                        this.secondSign = null;
+                        this.flowerButton.disabled = false;
+                        this.boards.forEach(function (board) {
+                            board.show = true;
+                        });
+                        this.calculate();
+                    });
+                    
+                    this.coin10Button.addEventListener("click", () => {
+                        this.handleSign('1');
+                    });
+                    
+                    this.coin20Button.addEventListener("click", () => {
+                        this.handleSign('2');
+                    });
+                    
+                    this.flowerButton.addEventListener("click", () => {
+                        this.handleSign('F');
+                    });
+                    
+                    this.starButton.addEventListener("click", () => {
+                        this.handleSign('S');
+                    });
+                    
+                    this.upButton.addEventListener("click", () => {
+                        this.handleSign('U');
+                    });
+                    
+                    this.mushroomButton.addEventListener("click", () => {
+                        this.handleSign('M');
+                    });
+                }
+                
+                  showItems() {
+                    let that = this;
+                    this.items.innerHTML = '';
+                    this.boards.forEach(function (board) {
+                        let div = '<div>';
+                        div += 'Board ' + board.number;
+                        div += '<table>';
+                        for (let y = 0; y <= 2; y++) {
+                            div += '<tr>';
+                            for (let x = 0; x <= 5; x++) {
+                                div += '<td>';
+                                div += board.getField(y, x);
+                                div += '</td>';
+                            }
+                            div += '</tr>';
+                        }                         
+                        div += '</table>';
+                        div += '</div>';
+                        that.items.innerHTML += div;
+                    });
+                }
+
+                loadBoards() {
+                    this.boards = [];
+                    {
+                        let board = new Board(1);
+                        board.addField(0, 0, 'F');
+                        board.addField(0, 1, '1');
+                        board.addField(0, 2, 'U');
+                        board.addField(0, 3, 'F');
+                        board.addField(0, 4, 'U');
+                        board.addField(0, 5, 'M');
+                        
+                        board.addField(1, 0, 'S');
+                        board.addField(1, 1, 'M');
+                        board.addField(1, 2, '2');
+                        board.addField(1, 3, 'S');
+                        board.addField(1, 4, 'M');
+                        board.addField(1, 5, '1');
+                        
+                        board.addField(2, 0, 'S')
+                        board.addField(2, 1, 'F');
+                        board.addField(2, 2, '2');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(2);
+                        board.addField(0, 0, 'M');
+                        board.addField(0, 1, 'F');
+                        board.addField(0, 2, '2');
+                        board.addField(0, 3, 'M');
+                        board.addField(0, 4, '1');
+                        board.addField(0, 5, 'S');
+                        
+                        board.addField(1, 0, 'F');
+                        board.addField(1, 1, 'U');
+                        board.addField(1, 2, 'M');
+                        board.addField(1, 3, '1');
+                        board.addField(1, 4, 'U');
+                        board.addField(1, 5, '2');
+                        
+                        board.addField(2, 0, 'S');
+                        board.addField(2, 1, 'F');
+                        board.addField(2, 2, 'S');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+        }
+        {
+            let board = new Board(3);
+            board.addField(0, 0, 'U');
+            board.addField(0, 1, 'M');
+            board.addField(0, 2, '1');
+            board.addField(0, 3, 'M');
+            board.addField(0, 4, 'F');
+            board.addField(0, 5, 'S');
+                
+            board.addField(1, 0, 'M');
+            board.addField(1, 1, '1');
+            board.addField(1, 2, 'S');
+            board.addField(1, 3, '2');
+            board.addField(1, 4, '2');
+            board.addField(1, 5, 'F');
+                
+            board.addField(2, 0, 'S');
+            board.addField(2, 1, 'U');
+            board.addField(2, 2, 'F');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+        {
+            let board = new Board(4);
+            board.addField(0, 0, 'F');
+            board.addField(0, 1, '2');
+            board.addField(0, 2, 'M');
+            board.addField(0, 3, 'S');
+            board.addField(0, 4, 'U');
+            board.addField(0, 5, 'F');
+                
+            board.addField(1, 0, 'U');
+            board.addField(1, 1, 'F');
+            board.addField(1, 2, '1');
+            board.addField(1, 3, 'M');
+            board.addField(1, 4, '2');
+            board.addField(1, 5, 'S');
+                
+            board.addField(2, 0, 'M');
+            board.addField(2, 1, '1');
+            board.addField(2, 2, 'S');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+        {
+            let board = new Board(5);
+            board.addField(0, 0, 'M');
+            board.addField(0, 1, 'F');
+            board.addField(0, 2, '2');
+            board.addField(0, 3, 'F');
+            board.addField(0, 4, '1');
+            board.addField(0, 5, 'S');
+                
+            board.addField(1, 0, '2');
+            board.addField(1, 1, 'U');
+            board.addField(1, 2, 'M');
+            board.addField(1, 3, '1');
+            board.addField(1, 4, 'U');
+            board.addField(1, 5, 'F');
+                
+            board.addField(2, 0, 'S');
+            board.addField(2, 1, 'M');
+            board.addField(2, 2, 'S');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+        {
+            let board = new Board(6);
+            board.addField(0, 0, 'F');
+            board.addField(0, 1, 'S');
+            board.addField(0, 2, 'U');
+            board.addField(0, 3, 'F');
+            board.addField(0, 4, 'U');
+            board.addField(0, 5, 'M');
+                
+            board.addField(1, 0, '1');
+            board.addField(1, 1, 'M');
+            board.addField(1, 2, 'F');
+            board.addField(1, 3, 'S');
+            board.addField(1, 4, 'M');
+            board.addField(1, 5, '1');
+                
+            board.addField(2, 0, 'S');
+            board.addField(2, 1, '2');
+            board.addField(2, 2, '2');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+        {
+            let board = new Board(7);
+            board.addField(0, 0, 'F');
+            board.addField(0, 1, 'S');
+            board.addField(0, 2, 'U');
+            board.addField(0, 3, 'F');
+            board.addField(0, 4, '2');
+            board.addField(0, 5, 'M');
+                
+            board.addField(1, 0, '1');
+            board.addField(1, 1, 'M');
+            board.addField(1, 2, '2');
+            board.addField(1, 3, 'U');
+            board.addField(1, 4, 'M');
+            board.addField(1, 5, '1');
+                
+            board.addField(2, 0, 'S');
+            board.addField(2, 1, 'F');
+            board.addField(2, 2, 'S');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+        {
+            let board = new Board(8);
+            board.addField(0, 0, 'M');
+            board.addField(0, 1, 'F');
+            board.addField(0, 2, 'U');
+            board.addField(0, 3, 'F');
+            board.addField(0, 4, 'S');
+            board.addField(0, 5, 'S');
+                
+            board.addField(1, 0, '2');
+            board.addField(1, 1, 'S');
+            board.addField(1, 2, 'M');
+            board.addField(1, 3, '1');
+            board.addField(1, 4, 'U');
+            board.addField(1, 5, 'F');
+                
+            board.addField(2, 0, '2');
+            board.addField(2, 1, 'S');
+            board.addField(2, 2, '1');
+            board.addField(2, 3, 'M');
+            board.addField(2, 4, 'F');
+            board.addField(2, 5, 'S');
+            this.boards.push(board);
+        }
+                    console.log(this.boards);
+                }
+                
+              
+            }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", init);
+            } else {
+                init();
+            }
+        </script>
+        <style type="text/css">
+            td {
+                width: 50px;
+                height: 50px;
+                border: solid 1px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            #items div {
+                float: left;
+                margin-right: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="header">
+                <h1>m3map</h1>
+                <button id="resetButton">reset</button>
+            </div>
+            <div id="workspace">
+                <button id="c10" class="item_c10">10</button>
+                <button id="c20" class="item_c20">20</button>
+                <button id="flower" class="item_flower">flower</button>
+                <button id="star" class="item_star">star</button>
+                <button id="up" class="item_up">up</button>
+                <button id="mushroom" class="item_mushroom">mushroom</button>
+                <div>
+                    1) select snd left in border line (in game) and hit the representing button <br />
+                    2a) if not flower, the thing is clear, which map you play, 83% :) <br />
+                    2b) if flower, select 2nd left in top line, continue with 3)<br />
+                    3) 3 possibilities: star, flower, 10coins, 33% that you can continue<br />
+                </div>
+                <div>
+                    first sign: <span id="firstSign"></span><br>
+                    second sign: <span id="secondSign"></span><br>
+                </div>
+                <div>
+                    <table id="possibles">
+                        
+                    </table>
+                </div>  
+            </div>
+            <div id="items">
+                
+            </div>
+        </div>
+    </body>
+</html>
+
