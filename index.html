@@ -72,7 +72,6 @@
                         return;
                     }
                     if(null === this.secondSign) {
-                        this.flowerButton.disabled = true;
                         this.possibleBoards = [];
                         this.boards.forEach(function (board) {
                             if(board.getField(2,1) === that.firstSign) {
@@ -131,7 +130,6 @@
                     this.resetButton.addEventListener("click", () => {
                         this.firstSign  = null;
                         this.secondSign = null;
-                        this.flowerButton.disabled = false;
                         this.boards.forEach(function (board) {
                             board.show = true;
                         });
