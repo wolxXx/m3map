@@ -497,13 +497,21 @@
             #items {
                 margin-top: 100px;
             }
+            .stepLabel {
+                width: 60px;
+                display: inline-block;
+            }
         </style>
     </head>
     <body>
         <div id="container">
             <div id="header">
-                <h1>m3map</h1>
-                <button id="resetButton">reset</button>
+                <h1>
+                    m3map
+                </h1>
+                <button id="resetButton">
+                    reset choices
+                </button>
             </div>
             <div id="workspace">
                 <button id="c10" class="item_c10">1O</button>
@@ -513,10 +521,19 @@
                 <button id="up" class="item_up">uP</button>
                 <button id="mushroom" class="item_mushroom">shrO0m</button>
                 <div>
-                    1) select 2nd left in border line (in game) and hit the representing button <br />
-                    2a) if not flower, the thing is clear, which map you play, 83% chance :) <br />
-                    2b) if flower, select 2nd left in top line, continue with 3)<br />
-                    3) 3 possibilities: star, flower, 10coins, 33% that you can continue!!<br />
+                    <span class="stepLabel">
+                        1)
+                    </span> select 2nd left in border line (in game) and hit the representing button <br />
+                    <span class="stepLabel">
+                        2a)
+                    </span> if not flower, the thing is clear, which map you play, 83% chance :) <br />
+                    <span class="stepLabel">
+                        2b)
+                    </span> if flower, select 2nd left in top line, continue with 3)<br />
+                    <span class="stepLabel">
+                        3)
+                    </span> 3 possibilities: star, flower, 10coins, 33% that you can continue!!<br />
+                    <br />
                 </div>
                 <div>
                     first sign: <span id="firstSign"></span><br>
