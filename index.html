@@ -40,8 +40,11 @@
                         spanClass = 'item_mushroom';
                         break;
                     }
+                    default: {
+                        spanClass = 'item_empty';
+                    }
                 }
-                return '<span class="'+spanClass+'">' + sign + '</span>';
+                return '<span class="' + spanClass + '"></span>';
             }
             
             class Field{
@@ -64,7 +67,7 @@
                 }
                 addField(y,x,sign) {
                     this.fields[y][x] = sign;
-                    console.table(this.fields);
+                    //console.table(this.fields);
                     return this;
                 }
                 getField(y,x) {
@@ -72,6 +75,15 @@
                 }
 
             }
+
+            const Signs = Object.freeze({
+                COIN_10:   Symbol("c10"),
+                COIN_20:   Symbol("c20"),
+                FLOWER:    Symbol("flower"),
+                STAR:      Symbol("star"),
+                UP:        Symbol("up"),
+                MUSHROOM:  Symbol("mushroom"),
+            });
 
             class Manager {
                 constructor() {
@@ -96,20 +108,38 @@
 
                 calculate() {
                     let that = this;
-                    console.log('calculating');
-                    console.log(this.firstSign);
-                    console.log(this.secondSign);
-                    document.getElementById('firstSign').innerHTML = this.firstSign;
-                    document.getElementById('secondSign').innerHTML = this.secondSign;
-                    if(null === this.firstSign) {
+                    document.getElementById('firstSign').innerHTML = signToSpan(this.firstSign);
+                    document.getElementById('secondSign').innerHTML = signToSpan(this.secondSign);
+
+                    document.getElementById('firstSign').addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        that.firstSign = null;
+                        that.secondSign = null;
+                        that.calculate();
+
+                        return false;
+                    });
+
+                    document.getElementById('secondSign').addEventListener("click", (event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        that.secondSign = null;
+                        that.calculate();
+
+                        return false;
+                    });
+
+                    if (null === this.firstSign) {
                         this.possibleBoards = this.boards;
                         this.showPossibilities();
                         return;
                     }
-                    if(null === this.secondSign) {
+                    if (null === this.secondSign) {
                         this.possibleBoards = [];
                         this.boards.forEach(function (board) {
-                            if(board.getField(2,1) === that.firstSign) {
+                            if (board.getField(2, 1) === that.firstSign) {
                                 that.possibleBoards.push(board);
                             }
                         });
@@ -126,17 +156,22 @@
                 }
                 
                 showPossibilities() {
-                    console.log(this.possibleBoards);
                     let out  = document.getElementById('possibles');
                     out.classList.remove('open');
-                    console.log(this.possibleBoards.length);
-                    if(this.possibleBoards.length > 1) {
+                    out.classList.remove('impossible');
+                    if (this.possibleBoards.length > 1) {
                         out.classList.add('open');
                     }
                     out.innerHTML = '';
-                    let moo = '';
+                    if (0 === this.possibleBoards.length) {
+                        out.classList.add('impossible');
+                        out.innerHTML = 'no cards found for this situation :/ <br> <img src="/bowser.jpeg" alt="gif" /><p></p><p></p>';
+                        return
+                    }
+
+                    let tableBody = '';
                     for (let y = 0; y <= 2; y++) {
-                        moo += '<tr>';
+                        tableBody += '<tr>';
                         for (let x = 0; x <= 5; x++) {
                             let signs = [];
                             this.possibleBoards.forEach(function (board) {
@@ -145,22 +180,22 @@
                             signs = signs.filter(function (value, index, self) {
                                 return self.indexOf(value) === index;
                             })
-                            moo += '<td>';
-                            moo += signs.join(' ');
-                            moo += '</td>';
+                            tableBody += '<td>';
+                            tableBody += signs.join(' ');
+                            tableBody += '</td>';
                         }
-                        moo += '</tr>';
+                        tableBody += '</tr>';
                     }
-                    out.innerHTML += moo;
+                    out.innerHTML += tableBody;
                 }
-                
+
                 handleSign(what) {
-                    if(null === this.firstSign) {
+                    if (null === this.firstSign) {
                         this.firstSign = what;
                         this.calculate();
                         return;
                     }
-                    if(null === this.secondSign) {
+                    if (null === this.secondSign) {
                         this.secondSign = what;
                         this.calculate();
                     }
@@ -233,14 +268,14 @@
                         board.addField(0, 3, 'F');
                         board.addField(0, 4, 'U');
                         board.addField(0, 5, 'M');
-                        
+
                         board.addField(1, 0, 'S');
                         board.addField(1, 1, 'M');
                         board.addField(1, 2, '2');
                         board.addField(1, 3, 'S');
                         board.addField(1, 4, 'M');
                         board.addField(1, 5, '1');
-                        
+
                         board.addField(2, 0, 'S')
                         board.addField(2, 1, 'F');
                         board.addField(2, 2, '2');
@@ -257,14 +292,14 @@
                         board.addField(0, 3, 'M');
                         board.addField(0, 4, '1');
                         board.addField(0, 5, 'S');
-                        
+
                         board.addField(1, 0, 'F');
                         board.addField(1, 1, 'U');
                         board.addField(1, 2, 'M');
                         board.addField(1, 3, '1');
                         board.addField(1, 4, 'U');
                         board.addField(1, 5, '2');
-                        
+
                         board.addField(2, 0, 'S');
                         board.addField(2, 1, 'F');
                         board.addField(2, 2, 'S');
@@ -272,155 +307,155 @@
                         board.addField(2, 4, 'F');
                         board.addField(2, 5, 'S');
                         this.boards.push(board);
-        }
-        {
-            let board = new Board(3);
-            board.addField(0, 0, 'U');
-            board.addField(0, 1, 'M');
-            board.addField(0, 2, '1');
-            board.addField(0, 3, 'M');
-            board.addField(0, 4, 'F');
-            board.addField(0, 5, 'S');
-                
-            board.addField(1, 0, 'M');
-            board.addField(1, 1, '1');
-            board.addField(1, 2, 'S');
-            board.addField(1, 3, '2');
-            board.addField(1, 4, '2');
-            board.addField(1, 5, 'F');
-                
-            board.addField(2, 0, 'S');
-            board.addField(2, 1, 'U');
-            board.addField(2, 2, 'F');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
-        {
-            let board = new Board(4);
-            board.addField(0, 0, 'F');
-            board.addField(0, 1, '2');
-            board.addField(0, 2, 'M');
-            board.addField(0, 3, 'S');
-            board.addField(0, 4, 'U');
-            board.addField(0, 5, 'F');
-                
-            board.addField(1, 0, 'U');
-            board.addField(1, 1, 'F');
-            board.addField(1, 2, '1');
-            board.addField(1, 3, 'M');
-            board.addField(1, 4, '2');
-            board.addField(1, 5, 'S');
-                
-            board.addField(2, 0, 'M');
-            board.addField(2, 1, '1');
-            board.addField(2, 2, 'S');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
-        {
-            let board = new Board(5);
-            board.addField(0, 0, 'M');
-            board.addField(0, 1, 'F');
-            board.addField(0, 2, '2');
-            board.addField(0, 3, 'F');
-            board.addField(0, 4, '1');
-            board.addField(0, 5, 'S');
-                
-            board.addField(1, 0, '2');
-            board.addField(1, 1, 'U');
-            board.addField(1, 2, 'M');
-            board.addField(1, 3, '1');
-            board.addField(1, 4, 'U');
-            board.addField(1, 5, 'F');
-                
-            board.addField(2, 0, 'S');
-            board.addField(2, 1, 'M');
-            board.addField(2, 2, 'S');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
-        {
-            let board = new Board(6);
-            board.addField(0, 0, 'F');
-            board.addField(0, 1, 'S');
-            board.addField(0, 2, 'U');
-            board.addField(0, 3, 'F');
-            board.addField(0, 4, 'U');
-            board.addField(0, 5, 'M');
-                
-            board.addField(1, 0, '1');
-            board.addField(1, 1, 'M');
-            board.addField(1, 2, 'F');
-            board.addField(1, 3, 'S');
-            board.addField(1, 4, 'M');
-            board.addField(1, 5, '1');
-                
-            board.addField(2, 0, 'S');
-            board.addField(2, 1, '2');
-            board.addField(2, 2, '2');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
-        {
-            let board = new Board(7);
-            board.addField(0, 0, 'F');
-            board.addField(0, 1, 'S');
-            board.addField(0, 2, 'U');
-            board.addField(0, 3, 'F');
-            board.addField(0, 4, '2');
-            board.addField(0, 5, 'M');
-                
-            board.addField(1, 0, '1');
-            board.addField(1, 1, 'M');
-            board.addField(1, 2, '2');
-            board.addField(1, 3, 'U');
-            board.addField(1, 4, 'M');
-            board.addField(1, 5, '1');
-                
-            board.addField(2, 0, 'S');
-            board.addField(2, 1, 'F');
-            board.addField(2, 2, 'S');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
-        {
-            let board = new Board(8);
-            board.addField(0, 0, 'M');
-            board.addField(0, 1, 'F');
-            board.addField(0, 2, 'U');
-            board.addField(0, 3, 'F');
-            board.addField(0, 4, 'S');
-            board.addField(0, 5, 'S');
-                
-            board.addField(1, 0, '2');
-            board.addField(1, 1, 'S');
-            board.addField(1, 2, 'M');
-            board.addField(1, 3, '1');
-            board.addField(1, 4, 'U');
-            board.addField(1, 5, 'F');
-                
-            board.addField(2, 0, '2');
-            board.addField(2, 1, 'S');
-            board.addField(2, 2, '1');
-            board.addField(2, 3, 'M');
-            board.addField(2, 4, 'F');
-            board.addField(2, 5, 'S');
-            this.boards.push(board);
-        }
+                    }
+                    {
+                        let board = new Board(3);
+                        board.addField(0, 0, 'U');
+                        board.addField(0, 1, 'M');
+                        board.addField(0, 2, '1');
+                        board.addField(0, 3, 'M');
+                        board.addField(0, 4, 'F');
+                        board.addField(0, 5, 'S');
+
+                        board.addField(1, 0, 'M');
+                        board.addField(1, 1, '1');
+                        board.addField(1, 2, 'S');
+                        board.addField(1, 3, '2');
+                        board.addField(1, 4, '2');
+                        board.addField(1, 5, 'F');
+
+                        board.addField(2, 0, 'S');
+                        board.addField(2, 1, 'U');
+                        board.addField(2, 2, 'F');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(4);
+                        board.addField(0, 0, 'F');
+                        board.addField(0, 1, '2');
+                        board.addField(0, 2, 'M');
+                        board.addField(0, 3, 'S');
+                        board.addField(0, 4, 'U');
+                        board.addField(0, 5, 'F');
+
+                        board.addField(1, 0, 'U');
+                        board.addField(1, 1, 'F');
+                        board.addField(1, 2, '1');
+                        board.addField(1, 3, 'M');
+                        board.addField(1, 4, '2');
+                        board.addField(1, 5, 'S');
+
+                        board.addField(2, 0, 'M');
+                        board.addField(2, 1, '1');
+                        board.addField(2, 2, 'S');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(5);
+                        board.addField(0, 0, 'M');
+                        board.addField(0, 1, 'F');
+                        board.addField(0, 2, '2');
+                        board.addField(0, 3, 'F');
+                        board.addField(0, 4, '1');
+                        board.addField(0, 5, 'S');
+
+                        board.addField(1, 0, '2');
+                        board.addField(1, 1, 'U');
+                        board.addField(1, 2, 'M');
+                        board.addField(1, 3, '1');
+                        board.addField(1, 4, 'U');
+                        board.addField(1, 5, 'F');
+
+                        board.addField(2, 0, 'S');
+                        board.addField(2, 1, 'M');
+                        board.addField(2, 2, 'S');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(6);
+                        board.addField(0, 0, 'F');
+                        board.addField(0, 1, 'S');
+                        board.addField(0, 2, 'U');
+                        board.addField(0, 3, 'F');
+                        board.addField(0, 4, 'U');
+                        board.addField(0, 5, 'M');
+
+                        board.addField(1, 0, '1');
+                        board.addField(1, 1, 'M');
+                        board.addField(1, 2, 'F');
+                        board.addField(1, 3, 'S');
+                        board.addField(1, 4, 'M');
+                        board.addField(1, 5, '1');
+
+                        board.addField(2, 0, 'S');
+                        board.addField(2, 1, '2');
+                        board.addField(2, 2, '2');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(7);
+                        board.addField(0, 0, 'F');
+                        board.addField(0, 1, 'S');
+                        board.addField(0, 2, 'U');
+                        board.addField(0, 3, 'F');
+                        board.addField(0, 4, '2');
+                        board.addField(0, 5, 'M');
+
+                        board.addField(1, 0, '1');
+                        board.addField(1, 1, 'M');
+                        board.addField(1, 2, '2');
+                        board.addField(1, 3, 'U');
+                        board.addField(1, 4, 'M');
+                        board.addField(1, 5, '1');
+
+                        board.addField(2, 0, 'S');
+                        board.addField(2, 1, 'F');
+                        board.addField(2, 2, 'S');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
+                    {
+                        let board = new Board(8);
+                        board.addField(0, 0, 'M');
+                        board.addField(0, 1, 'F');
+                        board.addField(0, 2, 'U');
+                        board.addField(0, 3, 'F');
+                        board.addField(0, 4, 'S');
+                        board.addField(0, 5, 'S');
+
+                        board.addField(1, 0, '2');
+                        board.addField(1, 1, 'S');
+                        board.addField(1, 2, 'M');
+                        board.addField(1, 3, '1');
+                        board.addField(1, 4, 'U');
+                        board.addField(1, 5, 'F');
+
+                        board.addField(2, 0, '2');
+                        board.addField(2, 1, 'S');
+                        board.addField(2, 2, '1');
+                        board.addField(2, 3, 'M');
+                        board.addField(2, 4, 'F');
+                        board.addField(2, 5, 'S');
+                        this.boards.push(board);
+                    }
                     console.log(this.boards);
                 }
-                
-              
+
+
             }
 
             if (document.readyState === "loading") {
@@ -430,24 +465,42 @@
             }
         </script>
         <style type="text/css">
-            body, html {
+            body, html, a {
                 background: #000;
                 color: 	#00ff2b;
+                margin: 0;
+                padding: 0;
+                font-family: monospace;
+                font-size: 0.8em;
+            }
+            h1 {
+                margin-left: 0;
+                margin-top: 0;
+                margin-bottom: 0;
+                border-bottom: 1px solid #00ff2b;
             }
             table {
                 width: 100%;
                 display: block;
             }
             td {
-                width: 80px;
-                height: 80px;
+                width: 100px;
+                height: 100px;
+                border: solid 1px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            #items td {
+                overflow: hidden;
+                width: 40px;
+                height: 40px;
                 border: solid 1px;
                 text-align: center;
                 vertical-align: middle;
             }
             #items div {
                 float: left;
-                margin-right: 50px;
+                margin-right: 30px;
             }
             button {
                 font-weight: bolder;
@@ -456,9 +509,12 @@
                 margin-left: 0;
                 color: 	#00ff2b;
                 border: solid 1px #36ba01;
-                background: #000;
+                border-radius: 3px;
+                box-shadow: 1px 5px 4px #00ff2b30;
+                background: #333;
+                cursor: pointer;
             }
-            span.item_c10, span.item_c20, span.item_flower, span.item_star, span.item_up, span.item_mushroom {
+            span.item_c10, span.item_c20, span.item_flower, span.item_star, span.item_up, span.item_mushroom, span.item_empty {
                 font-size: 0.1em;
                 background: #00ff2b;
                 display: inline-block;
@@ -469,12 +525,22 @@
                 background-position: center;
                 background-repeat: no-repeat;
             }
+            button.item_c10, button.item_c20, button.item_flower, button.item_star, button.item_up, button.item_mushroom, button.item_empty {
+                cursor: pointer;
+            }
             
             #possibles.open span {
                 width: 5px;
                 height: 5px;
                 min-width: 5px;
                 max-width: 5px;
+            }
+
+            #possibles.impossible {
+                border-top: solid 1px #36ba01;
+                border-bottom: solid 1px #36ba01;
+                margin-top: 10px;
+                margin-bottom: 10px;
             }
             span.item_c10 {
                 background: url("/ten.png") no-repeat center;
@@ -494,6 +560,9 @@
             span.item_mushroom {
                 background: url("/mushroom.png") no-repeat center;
             }
+            span.item_empty {
+                background: url("/unknown.png") no-repeat center;
+            }
             #items {
                 margin-top: 100px;
             }
@@ -507,23 +576,38 @@
         <div id="container">
             <div id="header">
                 <h1>
-                    m3map
+                    m3map - nes mario 3 card game solutions
                 </h1>
-                <button id="resetButton">
-                    reset choices
-                </button>
             </div>
             <div id="workspace">
-                <button id="c10" class="item_c10">1O</button>
-                <button id="c20" class="item_c20">2O</button>
-                <button id="flower" class="item_flower">fl0w3r</button>
-                <button id="star" class="item_star">star</button>
-                <button id="up" class="item_up">uP</button>
-                <button id="mushroom" class="item_mushroom">shrO0m</button>
-                <div>
+                <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start;">
+                    <button id="resetButton">
+                        reset
+                    </button>
+                    <button id="c10" class="item_c10">
+                        <span class="item_c10"></span>
+                    </button>
+                    <button id="c20" class="item_c20">
+                        <span class="item_c20"></span>
+                    </button>
+                    <button id="flower" class="item_flower">
+                        <span class="item_flower"></span>
+                    </button>
+                    <button id="star" class="item_star">
+                        <span class="item_star"></span>
+                    </button>
+                    <button id="up" class="item_up">
+                        <span class="item_up"></span>
+                    </button>
+                    <button id="mushroom" class="item_mushroom">
+                        <span class="item_mushroom"></span>
+                    </button>
+                </div>
+                
+                <div style="margin-top: 10px;">
                     <span class="stepLabel">
                         1)
-                    </span> select 2nd left in border line (in game) and hit the representing button <br />
+                    </span> select 2nd left in borderline (in game) and hit the representing button <br />
                     <span class="stepLabel">
                         2a)
                     </span> if not flower, the thing is clear, which map you play, 83% chance :) <br />
@@ -535,16 +619,24 @@
                     </span> 3 possibilities: star, flower, 10coins, 33% that you can continue!!<br />
                     <br />
                 </div>
-                <div>
-                    first sign: <span id="firstSign"></span><br>
-                    second sign: <span id="secondSign"></span><br>
+                <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start;">
+                    <span>
+                        first sign:
+                    </span>
+
+                    <span id="firstSign"></span>
+
+                    <span>
+                        second sign:
+                    </span>
+                    <span id="secondSign"></span>
                 </div>
                 <div>
                     <table id="possibles">
-                        
                     </table>
                 </div>  
             </div>
+            source: <a href="https://github.com/wolxXx/m3map" target="_blank">https://github.com/wolxXx/m3map</a>
             <div id="items">
                 
             </div>
